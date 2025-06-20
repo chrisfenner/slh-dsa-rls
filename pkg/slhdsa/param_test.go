@@ -14,7 +14,7 @@ func TestParameterSetCalculations(t *testing.T) {
 	for _, tc := range []struct {
 		Name                      string
 		Params                    ParameterSet
-		HPrime                    int
+		H                         int
 		M                         int
 		SignatureSize             int
 		SignatureHashes           int64
@@ -26,13 +26,13 @@ func TestParameterSetCalculations(t *testing.T) {
 			Name: "A-1",
 			Params: ParameterSet{
 				TargetSecurityLevel: 128,
-				H:                   20,
+				HPrime:              5,
 				D:                   4,
 				T:                   8,
 				K:                   23,
-				W:                   4,
+				LgW:                 4,
 			},
-			HPrime:                    5,
+			H:                         20,
 			M:                         26,
 			SignatureSize:             5888,
 			SignatureHashes:           89576,
@@ -44,13 +44,13 @@ func TestParameterSetCalculations(t *testing.T) {
 			Name: "A-12",
 			Params: ParameterSet{
 				TargetSecurityLevel: 128,
-				H:                   32,
+				HPrime:              4,
 				D:                   8,
 				T:                   9,
 				K:                   15,
-				W:                   4,
+				LgW:                 4,
 			},
-			HPrime:                    4,
+			H:                         32,
 			M:                         22,
 			SignatureSize:             7408,
 			SignatureHashes:           94956,
@@ -62,13 +62,13 @@ func TestParameterSetCalculations(t *testing.T) {
 			Name: "AAA-1",
 			Params: ParameterSet{
 				TargetSecurityLevel: 128,
-				H:                   30,
+				HPrime:              15,
 				D:                   2,
 				T:                   24,
 				K:                   5,
-				W:                   8,
+				LgW:                 8,
 			},
-			HPrime:                    15,
+			H:                         30,
 			M:                         19,
 			SignatureSize:             3072,
 			SignatureHashes:           553779196, // https://eprint.iacr.org/2024/018.pdf has 553779200, might be a precision issue
@@ -80,13 +80,13 @@ func TestParameterSetCalculations(t *testing.T) {
 			Name: "F-1",
 			Params: ParameterSet{
 				TargetSecurityLevel: 128,
-				H:                   36,
+				HPrime:              9,
 				D:                   4,
 				T:                   14,
 				K:                   9,
-				W:                   8,
+				LgW:                 8,
 			},
-			HPrime:                    9,
+			H:                         36,
 			M:                         22,
 			SignatureSize:             3904,
 			SignatureHashes:           9883638,
@@ -98,13 +98,13 @@ func TestParameterSetCalculations(t *testing.T) {
 			Name: "N-7",
 			Params: ParameterSet{
 				TargetSecurityLevel: 192,
-				H:                   24,
+				HPrime:              8,
 				D:                   3,
 				T:                   12,
 				K:                   18,
-				W:                   4,
+				LgW:                 4,
 			},
-			HPrime:                    8,
+			H:                         24,
 			M:                         30,
 			SignatureSize:             9888,
 			SignatureHashes:           849390,
@@ -116,13 +116,13 @@ func TestParameterSetCalculations(t *testing.T) {
 			Name: "W-1",
 			Params: ParameterSet{
 				TargetSecurityLevel: 192,
-				H:                   50,
+				HPrime:              5,
 				D:                   10,
 				T:                   12,
 				K:                   20,
-				W:                   6,
+				LgW:                 6,
 			},
-			HPrime:                    5,
+			H:                         50,
 			M:                         37,
 			SignatureSize:             15624,
 			SignatureHashes:           942693,
@@ -132,7 +132,7 @@ func TestParameterSetCalculations(t *testing.T) {
 		},
 	} {
 		t.Run(tc.Name, func(t *testing.T) {
-			if got, want := tc.Params.HPrime(), tc.HPrime; got != want {
+			if got, want := tc.Params.HypertreeHeight(), tc.H; got != want {
 				t.Errorf("HPrime = %v, want %v", got, want)
 			}
 			if got, want := tc.Params.M(), tc.M; got != want {

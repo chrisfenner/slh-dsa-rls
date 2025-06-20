@@ -7,12 +7,12 @@ import "math"
 type ParameterSet struct {
 	// The target security level in bits of the signature (e.g., 128 for Level 1)
 	TargetSecurityLevel int
-	// The height of the hypertree
-	H int
+	// The height of each XMSS key
+	HPrime int
 	// The number of layers of one-time signatures and Merkle trees within the hypertree
 	D int
 	// The log_2 of the Winternitz parameter for the one-time signatures
-	W int
+	LgW int
 	// The number of sets within a FORS
 	K int
 	// The 2^a = t private values within each FORS set
@@ -26,8 +26,8 @@ type ParameterSet struct {
 }
 
 // The height of each XMSS key
-func (p *ParameterSet) HPrime() int {
-	return p.H / p.D
+func (p *ParameterSet) HypertreeHeight() int {
+	return p.HPrime * p.D
 }
 
 // ceil returns the ceiling of the given division of two integers, as an integer
@@ -37,7 +37,7 @@ func ceil(num, denom int) int {
 
 // The length in bytes of the message digest
 func (p *ParameterSet) M() int {
-	return ceil(p.H-p.HPrime(), 8) + ceil(p.HPrime(), 8) + ceil(p.K*p.T, 8)
+	return ceil(p.HypertreeHeight()-p.HPrime, 8) + ceil(p.HPrime, 8) + ceil(p.K*p.T, 8)
 }
 
 func (p *ParameterSet) SecurityLevel(m float64) float64 {
@@ -58,12 +58,12 @@ func (p *ParameterSet) SecurityLevel(m float64) float64 {
 func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
 	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
 	lambda := 0.0
-	if m > float64(p.H) {
-		lambda = math.Exp2(m - float64(p.H))
+	if m > float64(p.HypertreeHeight()) {
+		lambda = math.Exp2(m - float64(p.HypertreeHeight()))
 	} else {
-		lambda = math.Pow(0.5, float64(p.H)-m)
+		lambda = math.Pow(0.5, float64(p.HypertreeHeight())-m)
 	}
-	log_lambda := m - float64(p.H)
+	log_lambda := m - float64(p.HypertreeHeight())
 
 	// This is the probability that a probe does not hit a specific valid signature within a specific FORS tree
 	prob_not_get_single_hit := 1.0 - math.Pow(0.5, float64(p.T))
@@ -145,12 +145,12 @@ func (p *ParameterSet) CheckSecurityLevel(m int) bool {
 func (p *ParameterSet) checkSecurityLevel(m int) bool {
 	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
 	lambda := 0.0
-	if m > p.H {
-		lambda = math.Exp2(float64(m - p.H))
+	if m > p.HypertreeHeight() {
+		lambda = math.Exp2(float64(m - p.HypertreeHeight()))
 	} else {
-		lambda = math.Pow(0.5, float64(p.H-m))
+		lambda = math.Pow(0.5, float64(p.HypertreeHeight()-m))
 	}
-	log_lambda := m - p.H
+	log_lambda := m - p.HypertreeHeight()
 
 	// If log_sum exeeds this, we know we didn't hit the security level
 	log_target := math.Log2(math.Exp(lambda)) - float64(p.TargetSecurityLevel)
@@ -246,8 +246,8 @@ func (p *ParameterSet) SignaturesAtLevel(target int) float64 {
 
 // Returns the number of Winternitz digits used
 func (p *ParameterSet) WinternitzDigits() int {
-	hash_d := ceil(p.TargetSecurityLevel, p.W)
-	w := 1 << p.W
+	hash_d := ceil(p.TargetSecurityLevel, p.LgW)
+	w := 1 << p.LgW
 	max_sum := (w - 1) * hash_d
 	checksum_d := 1
 	for prod := w; prod < max_sum; prod *= w {
@@ -260,18 +260,18 @@ func (p *ParameterSet) WinternitzDigits() int {
 func (p *ParameterSet) SignatureSize() int {
 	hash_size := (p.TargetSecurityLevel + 7) / 8
 
-	return hash_size * (1 + p.K*(p.T+1) + p.D*(p.WinternitzDigits()+p.HPrime()))
+	return hash_size * (1 + p.K*(p.T+1) + p.D*(p.WinternitzDigits()+p.HPrime))
 }
 
 // The number of hash operations required to produce a signature
 func (p *ParameterSet) SignatureHashes() int64 {
-	cost_ots := 1 + int64(p.WinternitzDigits())*(1<<p.W)
-	cost_hypertree := int64(p.D) * ((cost_ots+1)*(1<<p.HPrime()) - 1)
+	cost_ots := 1 + int64(p.WinternitzDigits())*(1<<p.LgW)
+	cost_hypertree := int64(p.D) * ((cost_ots+1)*(1<<p.HPrime) - 1)
 	cost_fors_tree := int64(3)*(1<<int64(p.T)) - 1
 	return 3 + cost_hypertree + int64(p.K)*cost_fors_tree
 }
 
 // The number of hash operations required to verify a signature
 func (p *ParameterSet) VerifyHashes() int64 {
-	return int64(1) + int64(p.K)*(int64(p.T)+1) + 1 + (int64(p.D) * (int64(p.WinternitzDigits())*(1<<int64(p.W))/2 + 1 + int64(p.HPrime())))
+	return int64(1) + int64(p.K)*(int64(p.T)+1) + 1 + (int64(p.D) * (int64(p.WinternitzDigits())*(1<<int64(p.LgW))/2 + 1 + int64(p.HPrime)))
 }
