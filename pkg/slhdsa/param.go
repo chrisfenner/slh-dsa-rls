@@ -7,8 +7,6 @@ import "math"
 type ParameterSet struct {
 	// The target security level in bits of the signature (e.g., 128 for Level 1)
 	TargetSecurityLevel int
-	// The length of each hash in bits
-	N int
 	// The height of the hypertree
 	H int
 	// The number of layers of one-time signatures and Merkle trees within the hypertree
@@ -39,7 +37,7 @@ func (p *ParameterSet) M() int {
 // Computes the exact security level of the parameter set for 2^m signatures
 // This is a Go translation of Scott Fluhrer's algorithm `compute_sec_level` from
 // https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
-func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
+func (p *ParameterSet) ComputeSecurityLevel(m float64) float64 {
 	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
 	lambda := 0.0
 	if m > float64(p.H) {
@@ -96,7 +94,7 @@ func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
 			log_sum = log_a + log_b
 		} else {
 			// For latter iterations, add log(ab) to the running sum
-			log_sum = math.Log2(math.Exp2(log_a) + math.Exp2(log_b))
+			log_sum = math.Log2(math.Exp2(log_sum) + math.Exp2(log_a+log_b))
 		}
 
 		// If the additional terms we're seeing is less than 2^{-20} of the
@@ -114,7 +112,7 @@ func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
 // Quickly checks if the parameter set meets its target security level for 2^m signatures
 // This is a Go translation of Scott Fluhrer's algorithm `check_sec_level` from
 // https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
-func (p *ParameterSet) checkSecurityLevel(m int) bool {
+func (p *ParameterSet) CheckSecurityLevel(m int) bool {
 	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
 	lambda := 0.0
 	if m > p.H {
@@ -202,15 +200,15 @@ func (p *ParameterSet) checkSecurityLevel(m int) bool {
 // The log_2 of the number of signatures that can be performed while retaining the security level
 // This is a Go translation of Scott Fluhrer's algorithm `compute_sigs_at_sec_level` from
 // https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
-func (p *ParameterSet) SignaturesAtLevel() float64 {
+func (p *ParameterSet) SignaturesAtLevel(target int) float64 {
 	// Scan for the number of signatures at a gross level (by integers)
 	lower := 0
-	for p.computeSecurityLevel(float64(lower+1)) < float64(p.TargetSecurityLevel) {
+	for p.ComputeSecurityLevel(float64(lower+1)) > float64(target) {
 		lower++
 	}
 	// Now scan by hundreds
 	fract := 0
-	for p.computeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) < float64(p.TargetSecurityLevel) {
+	for p.ComputeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) > float64(target) {
 		fract++
 	}
 	return float64(lower) + (float64(fract) / 100.0)
@@ -220,9 +218,9 @@ func (p *ParameterSet) SignaturesAtLevel() float64 {
 func (p *ParameterSet) WinternitzDigits() int {
 	hash_d := ceil(p.TargetSecurityLevel, p.W)
 	w := 1 << p.W
-	max_sum := (w + 1) * hash_d
+	max_sum := (w - 1) * hash_d
 	checksum_d := 1
-	for prod := 1; prod < max_sum; prod *= w {
+	for prod := w; prod < max_sum; prod *= w {
 		checksum_d++
 	}
 	return hash_d + checksum_d
@@ -232,18 +230,18 @@ func (p *ParameterSet) WinternitzDigits() int {
 func (p *ParameterSet) SignatureSize() int {
 	hash_size := (p.TargetSecurityLevel + 7) / 8
 
-	return hash_size * (1 + p.K*(p.T+1) + p.D*(p.WinternitzDigits()+p.H))
+	return hash_size * (1 + p.K*(p.T+1) + p.D*(p.WinternitzDigits()+p.HPrime()))
 }
 
 // The number of hash operations required to produce a signature
 func (p *ParameterSet) SignatureHashes() int64 {
 	cost_ots := 1 + int64(p.WinternitzDigits())*(1<<p.W)
-	cost_hypertree := int64(p.D) * ((cost_ots+1)*1<<p.H - 1)
+	cost_hypertree := int64(p.D) * ((cost_ots+1)*(1<<p.HPrime()) - 1)
 	cost_fors_tree := int64(3)*(1<<int64(p.T)) - 1
 	return 3 + cost_hypertree + int64(p.K)*cost_fors_tree
 }
 
 // The number of hash operations required to verify a signature
 func (p *ParameterSet) VerifyHashes() int64 {
-	return int64(1) + int64(p.K)*(int64(p.T)+1) + 1 + (int64(p.D) * (int64(p.WinternitzDigits())*(1<<int64(p.W))/2 + 1 + int64(p.H)))
+	return int64(1) + int64(p.K)*(int64(p.T)+1) + 1 + (int64(p.D) * (int64(p.WinternitzDigits())*(1<<int64(p.W))/2 + 1 + int64(p.HPrime())))
 }
