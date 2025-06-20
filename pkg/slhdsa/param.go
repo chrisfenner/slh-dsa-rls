@@ -17,6 +17,12 @@ type ParameterSet struct {
 	K int
 	// The 2^a = t private values within each FORS set
 	T int
+
+	// Cached values
+	securityLevelSignatureCount      *float64
+	securityLevel                    *float64
+	checkSecurityLevelSignatureCount *int
+	checkedSecurityLevel             *bool
 }
 
 // The height of each XMSS key
@@ -34,10 +40,22 @@ func (p *ParameterSet) M() int {
 	return ceil(p.H-p.HPrime(), 8) + ceil(p.HPrime(), 8) + ceil(p.K*p.T, 8)
 }
 
+func (p *ParameterSet) SecurityLevel(m float64) float64 {
+	if p.securityLevelSignatureCount != nil && *p.securityLevelSignatureCount == m {
+		return *p.securityLevel
+	}
+
+	// Compute & cache
+	p.securityLevelSignatureCount = &m
+	result := p.computeSecurityLevel(m)
+	p.securityLevel = &result
+	return result
+}
+
 // Computes the exact security level of the parameter set for 2^m signatures
 // This is a Go translation of Scott Fluhrer's algorithm `compute_sec_level` from
 // https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
-func (p *ParameterSet) ComputeSecurityLevel(m float64) float64 {
+func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
 	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
 	lambda := 0.0
 	if m > float64(p.H) {
@@ -109,10 +127,22 @@ func (p *ParameterSet) ComputeSecurityLevel(m float64) float64 {
 	return lambda*math.Log2(math.E) - log_sum
 }
 
+func (p *ParameterSet) CheckSecurityLevel(m int) bool {
+	if p.checkSecurityLevelSignatureCount != nil && *p.checkSecurityLevelSignatureCount == m {
+		return *p.checkedSecurityLevel
+	}
+
+	// Compute & cache
+	p.checkSecurityLevelSignatureCount = &m
+	result := p.checkSecurityLevel(m)
+	p.checkedSecurityLevel = &result
+	return result
+}
+
 // Quickly checks if the parameter set meets its target security level for 2^m signatures
 // This is a Go translation of Scott Fluhrer's algorithm `check_sec_level` from
 // https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
-func (p *ParameterSet) CheckSecurityLevel(m int) bool {
+func (p *ParameterSet) checkSecurityLevel(m int) bool {
 	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
 	lambda := 0.0
 	if m > p.H {
@@ -172,7 +202,7 @@ func (p *ParameterSet) CheckSecurityLevel(m int) bool {
 			log_sum = log_a + log_b
 		} else {
 			// For latter iterations, add log(ab) to the running sum
-			log_sum = math.Log2(math.Exp2(log_a) + math.Exp2(log_b))
+			log_sum = math.Log2(math.Exp2(log_sum) + math.Exp2(log_a+log_b))
 		}
 
 		// Check for negative results (we don't meet the target)
@@ -203,12 +233,12 @@ func (p *ParameterSet) CheckSecurityLevel(m int) bool {
 func (p *ParameterSet) SignaturesAtLevel(target int) float64 {
 	// Scan for the number of signatures at a gross level (by integers)
 	lower := 0
-	for p.ComputeSecurityLevel(float64(lower+1)) > float64(target) {
+	for p.computeSecurityLevel(float64(lower+1)) > float64(target) {
 		lower++
 	}
 	// Now scan by hundreds
 	fract := 0
-	for p.ComputeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) > float64(target) {
+	for p.computeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) > float64(target) {
 		fract++
 	}
 	return float64(lower) + (float64(fract) / 100.0)
