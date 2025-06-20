@@ -1,7 +1,9 @@
 // Package slhdsa contains SLH-DSA related code.
 package slhdsa
 
-import "math"
+import (
+	"math"
+)
 
 // ParameterSet contains all the values required to instantiate SLH-DSA.
 type ParameterSet struct {
@@ -21,7 +23,7 @@ type ParameterSet struct {
 	// Cached values
 	securityLevelSignatureCount      *float64
 	securityLevel                    *float64
-	checkSecurityLevelSignatureCount *int
+	checkSecurityLevelSignatureCount *float64
 	checkedSecurityLevel             *bool
 }
 
@@ -127,7 +129,7 @@ func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
 	return lambda*math.Log2(math.E) - log_sum
 }
 
-func (p *ParameterSet) CheckSecurityLevel(m int) bool {
+func (p *ParameterSet) CheckSecurityLevel(m float64) bool {
 	if p.checkSecurityLevelSignatureCount != nil && *p.checkSecurityLevelSignatureCount == m {
 		return *p.checkedSecurityLevel
 	}
@@ -139,92 +141,9 @@ func (p *ParameterSet) CheckSecurityLevel(m int) bool {
 	return result
 }
 
-// Quickly checks if the parameter set meets its target security level for 2^m signatures
-// This is a Go translation of Scott Fluhrer's algorithm `check_sec_level` from
-// https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
-func (p *ParameterSet) checkSecurityLevel(m int) bool {
-	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
-	lambda := 0.0
-	if m > p.HypertreeHeight() {
-		lambda = math.Exp2(float64(m - p.HypertreeHeight()))
-	} else {
-		lambda = math.Pow(0.5, float64(p.HypertreeHeight()-m))
-	}
-	log_lambda := m - p.HypertreeHeight()
-
-	// If log_sum exeeds this, we know we didn't hit the security level
-	log_target := math.Log2(math.Exp(lambda)) - float64(p.TargetSecurityLevel)
-
-	// This is the probability that a probe does not hit a specific valid signature within a specific FORS tree
-	prob_not_get_single_hit := 1.0 - math.Pow(0.5, float64(p.T))
-
-	// This is the probability that no probes hit a specific valid signature in a specific FORS tree
-	// after g signatures have been generated from this FORS.
-	// This is updated as g is iterated.
-	prob_not_get_g_hit := 1.0
-
-	// a == lambda^g
-	log_a := 0.0
-
-	// the running sum
-	log_sum := 0.0
-
-	for g := 1; ; g++ {
-		// Update the variables that depend on g
-		log_a += float64(log_lambda)
-		log_a -= math.Log2(float64(g))
-		prob_not_get_g_hit *= prob_not_get_single_hit
-
-		// a is the probability that there will be precisely g valid signatures
-		// for this FORS (except for the constant e^{-\lambda} term; we'll
-		// account for that at the end)
-
-		// Compute b which is probability that a single forgery query will lie
-		// entirely in revealed FORS leaves (and thus will allow a signature
-		// of that forgery), assuming we have precisely g valid signatures for
-		// this FORS
-		log_b := 0.0
-		if prob_not_get_g_hit < 0.00001 {
-			// If prob_not_get_g_hit is sufficiently small, the subtraction
-			// will lose significant bits (or just result in 1)
-			// In this regime, the quadratic approximation, that is, the first
-			// two terms in the Taylor expansion, gives us a more accurate value
-			log_b = float64(-p.K) * (prob_not_get_g_hit/math.Log(2.0) +
-				prob_not_get_g_hit*prob_not_get_g_hit/(2*math.Log(2.0)))
-		} else {
-			log_b = float64(p.K) * math.Log2(1-prob_not_get_g_hit)
-		}
-
-		// Hence, the probability that this iteration adds to the sum is
-		// a*b, and since we're dealing with logs, log(ab) = log(a) + log(b)
-		if g == 1 {
-			// For the first iteration, the running sum is the first output
-			log_sum = log_a + log_b
-		} else {
-			// For latter iterations, add log(ab) to the running sum
-			log_sum = math.Log2(math.Exp2(log_sum) + math.Exp2(log_a+log_b))
-		}
-
-		// Check for negative results (we don't meet the target)
-		if log_sum > log_target {
-			return false
-		}
-
-		// Check for positive results (we know we meet the target)
-		if float64(g) > 2*lambda {
-			p := lambda / float64(g+1)
-			// The maximum value the rest of the terms can add to sum
-			log_max_sum := math.Log2(p) - math.Log2(1-p)
-			if math.Log2(math.Exp2(log_sum)+math.Exp2(log_max_sum)) >= log_target {
-				// The sum cannot reach target (that is, we will exceed the security level)
-				return true
-			}
-		}
-		if g >= 10 && log_sum > 20+log_a {
-			// The rest of the terms are small; we will exceed the security level
-			return true
-		}
-	}
+// Checks if the parameter set meets its target security level for 2^m signatures
+func (p *ParameterSet) checkSecurityLevel(m float64) bool {
+	return p.computeSecurityLevel(m) >= float64(p.TargetSecurityLevel)
 }
 
 // The log_2 of the number of signatures that can be performed while retaining the security level
