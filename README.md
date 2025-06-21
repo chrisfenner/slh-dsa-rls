@@ -60,9 +60,16 @@ these parameter sets enforce rate-limiting due to their high signing cost on
 typical HSM hardware. Faster hardware (or a distributed system with multiple
 signers) will need to enforce rate-limiting via other means.
 
+Other search constraints:
+
+- max signature hashes: 2 billion
+- max signature size: 4000/7600/14000 bytes for level 1/3/5 to be competitive
+  with other suggested reduced-size parameter sets
+- max verify hashes: 1000
+
 For firmware signing, verification time and signature size are the most
 important factors, so the search weights them (by logarithm) evenly when
-comparing parameter sets.
+comparing parameter sets within these constraints.
 
 #### Target security level 128, 2^20.0 signatures
 
@@ -151,8 +158,16 @@ enforce rate-limiting due to their high signing cost on typical HSM hardware.
 Depending on the chosen parameter set, around 100 typical HSMs distributing the
 signing workload will still not exceed the rate limit.
 
+Other search constraints:
+
+- max signature hashes: 100M to keep signing reasonable (<=100x the rate limit)
+- max signature size: 5000/10000/16000 bytes for level 1/3/5 to be competitive
+  with other suggested reduced-size parameter sets
+- max verify hashes: 20000
+
 For software signing, signature size is the most important factor, so the
-search considers only signature size when comparing parameter sets.
+search considers only signature size when comparing parameter sets within
+these constraints.
 
 #### Target security level 128, 2^30.0 signatures
 
