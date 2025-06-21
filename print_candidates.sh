@@ -7,7 +7,7 @@ set -e
 # 2^20 for firmware signing
 
 go run ./cmd/slushfind \
-    --name_prefix=rls-128-fw \
+    --name_prefix=rls128-fw \
     --target_security_level=128 \
     --min_sig_count=20 \
     --max_sig_size=4000 \
@@ -23,7 +23,7 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls-192-fw \
+    --name_prefix=rls192-fw \
     --target_security_level=192 \
     --min_sig_count=20 \
     --max_sig_size=7600 \
@@ -39,7 +39,7 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls-256-fw \
+    --name_prefix=rls256-fw \
     --target_security_level=256 \
     --min_sig_count=20 \
     --max_sig_size=14000 \
@@ -57,7 +57,7 @@ echo
 # 2^30 for software signing
 
 go run ./cmd/slushfind \
-    --name_prefix=rls-128-sw \
+    --name_prefix=rls128-sw \
     --target_security_level=128 \
     --min_sig_count=30 \
     --max_sig_size=5000 \
@@ -73,7 +73,7 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls-192-sw \
+    --name_prefix=rls192-sw \
     --target_security_level=192 \
     --min_sig_count=30 \
     --max_sig_size=10000 \
@@ -89,7 +89,7 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls-256-sw \
+    --name_prefix=rls256-sw \
     --target_security_level=256 \
     --min_sig_count=30 \
     --max_sig_size=16000 \
