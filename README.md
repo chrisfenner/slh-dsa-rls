@@ -1,12 +1,13 @@
-# Relatively Little Signatures
+# Relatively Little Signatures for SLH-DSA
 
-This repository contains a tool to search the solution space for SLH-DSA parameter sets for firmware and software signing.
+This repository contains a tool to search the solution space for SLH-DSA
+parameter sets for firmware and software signing.
 
 ## Prior Work
 
 This project is heavily based on (and is tested against) Scott Fluhrer's work at
 https://github.com/sfluhrer/sphincs-param-set-search, and Scott Fluhrer and
-Quynh Dang's papaer "Smaller Sphincs+" ([^1]). This project allows a greater
+Quynh Dang's papaer "Smaller Sphincs+" [^1]. This project allows a greater
 variety of searches across the parameter set space of SLH-DSA, to customize the
 search for the constraints of firmware and software signing.
 
@@ -65,7 +66,7 @@ comparing parameter sets.
 
 #### Target security level 128, 2^20 signatures
 
-| id | h | d | h' | a | k | lg_w | m | sig bytes | sign time | verify time | sigs at 112 |
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 112 |
 | --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:|
 | rls-128-fw-1 | 22 | 1 | 22 | 22 | 6 | 2 | 20 | 3664 | 1224736764 | 299 | 24.99 |
 | rls-128-fw-2 | 22 | 1 | 22 | 19 | 7 | 2 | 20 | 3696 | 1160249339 | 301 | 24.5 |
@@ -90,7 +91,7 @@ comparing parameter sets.
 
 #### Target security level 192, 2^20 signatures
 
-| id | h | d | h' | a | k | lg_w | m | sig bytes | sign time | verify time | sigs at 128 |
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 128 |
 | --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:|
 | rls-192-fw-1 | 21 | 1 | 21 | 23 | 9 | 3 | 29 | 7320 | 1354760185 | 508 | 29.76 |
 | rls-192-fw-2 | 21 | 1 | 21 | 21 | 10 | 3 | 30 | 7416 | 1191182328 | 512 | 29.18 |
@@ -115,7 +116,7 @@ comparing parameter sets.
 
 #### Target security level 256, 2^20 signatures
 
-| id | h | d | h' | a | k | lg_w | m | sig bytes | sign time | verify time | sigs at 192 |
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 192 |
 | --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:|
 | rls-256-fw-1 | 21 | 1 | 21 | 20 | 14 | 3 | 38 | 12992 | 1558183924 | 678 | 27.17 |
 | rls-256-fw-2 | 19 | 1 | 19 | 24 | 12 | 3 | 39 | 13120 | 982515702 | 682 | 26.97 |
@@ -155,7 +156,7 @@ search considers only signature size when comparing parameter sets.
 
 #### Target security level 128, 2^30 signatures
 
-| id | h | d | h' | a | k | lg_w | m | sig bytes | sign time | verify time | sigs at 112 |
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 112 |
 | --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:|
 | rls-128-sw-1 | 36 | 3 | 12 | 21 | 6 | 8 | 21 | 3568 | 94396410 | 7085 | 37.68 |
 | rls-128-sw-2 | 36 | 3 | 12 | 18 | 7 | 8 | 21 | 3584 | 62152697 | 7086 | 37.05 |
@@ -180,7 +181,7 @@ search considers only signature size when comparing parameter sets.
 
 #### Target security level 192, 2^30 signatures
 
-| id | h | d | h' | a | k | lg_w | m | sig bytes | sign time | verify time | sigs at 128 |
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 128 |
 | --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:|
 | rls-192-sw-1 | 36 | 3 | 12 | 19 | 10 | 7 | 29 | 7848 | 62939126 | 6001 | 42.11 |
 | rls-192-sw-2 | 39 | 3 | 13 | 17 | 11 | 7 | 30 | 7872 | 98746357 | 6002 | 44.19 |
@@ -205,7 +206,7 @@ search considers only signature size when comparing parameter sets.
 
 #### Target security level 256, 2^30 signatures
 
-| id | h | d | h' | a | k | lg_w | m | sig bytes | sign time | verify time | sigs at 192 |
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 192 |
 | --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:|
 | rls-256-sw-1 | 36 | 3 | 12 | 19 | 14 | 7 | 39 | 13888 | 83386354 | 7809 | 41.06 |
 | rls-256-sw-2 | 36 | 3 | 12 | 18 | 15 | 7 | 39 | 14048 | 73162737 | 7814 | 40.94 |
