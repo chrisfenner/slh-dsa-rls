@@ -25,15 +25,16 @@ func intsBetween(start, end int) []int {
 var (
 	targetSecurityLevel   = flag.Int("target_security_level", 128, "target security (in bits)")
 	fallbackSecurityLevel = flag.Int("fallback_security_level", 112, "security level to calculate overuse")
-	minSignatureCount     = flag.Float64("min_signature_count", 20.0, "log_2 of the minimum number of signatures at the required security level")
+	minSignatureCount     = flag.Float64("min_sig_count", 20.0, "log_2 of the minimum number of signatures at the required security level")
 	maxSignatureSize      = flag.Int("max_sig_size", 4000, "maximum signature size (in bytes)")
-	minSignatureHashes    = flag.Int64("min_sig_hashes", 0, "minimum number of hashes to compute a signature")
-	maxSignatureHashes    = flag.Int64("max_sig_hashes", 10000000, "maximum number of hashes to compute a signature")
+	minSignatureHashes    = flag.Int64("min_sig_hashes", 900000000, "minimum number of hashes to compute a signature")
+	maxSignatureHashes    = flag.Int64("max_sig_hashes", 2000000000, "maximum number of hashes to compute a signature")
 	maxVerifyHashes       = flag.Int64("max_verify_hashes", 2000, "maximum number of hashes to verify a signature")
 	sigSizeWeight         = flag.Float64("eval_sig_size", 0.5, "how much to consider signature size in the evaluation function")
 	sigCostWeight         = flag.Float64("eval_sig_hashes", 0.0, "how much to consider signature cost in hashes in the evaluation function")
 	verifyCostWeight      = flag.Float64("eval_verify_hashes", 0.5, "how much to consider verification cost in the evaluation function")
 	tableFormat           = flag.String("table_format", "console", "style for the output, one of ('console', 'markdown', 'csv')")
+	namePrefix            = flag.String("name_prefix", "", "prefix to use for parameter set ID")
 )
 
 func main() {
@@ -63,7 +64,7 @@ func main() {
 		MinSignatures:       math.Exp2(*minSignatureCount),
 		HPrime:              intsBetween(1, 30),
 		D:                   intsBetween(1, 30),
-		LgW:                 intsBetween(1, 4),
+		LgW:                 intsBetween(1, 8),
 		K:                   intsBetween(1, 30),
 		T:                   intsBetween(1, 30),
 		SignatureSize:       func(sz int) bool { return sz <= *maxSignatureSize },
@@ -91,7 +92,7 @@ func main() {
 	results := search.Search(&searchParams)
 
 	t.AppendHeader(table.Row{
-		"i",
+		"id",
 		"h",
 		"d",
 		"h'",
@@ -106,8 +107,14 @@ func main() {
 	})
 
 	for i, result := range results {
+		var id string
+		if *namePrefix != "" {
+			id = fmt.Sprintf("%s-%d", *namePrefix, i+1)
+		} else {
+			id = fmt.Sprintf("%d", i+1)
+		}
 		t.AppendRow(table.Row{
-			i,                        // "i",
+			id,                       // "i",
 			result.HypertreeHeight(), // "h",
 			result.D,                 // "d",
 			result.HPrime,            // "h'",
