@@ -113,7 +113,16 @@ func main() {
 		} else {
 			id = fmt.Sprintf("%d", i+1)
 		}
-		sigHashesMillions := fmt.Sprintf("%dM", result.SignatureHashes()/1000000)
+		var sigHashes string
+		if result.SignatureHashes() > 1e9 {
+			sigHashes = fmt.Sprintf("%.3gB", float64(result.SignatureHashes())/1000000000.0)
+		} else if result.SignatureHashes() > 1e6 {
+			sigHashes = fmt.Sprintf("%.3gM", float64(result.SignatureHashes())/1000000.0)
+		} else if result.SignatureHashes() > 1e3 {
+			sigHashes = fmt.Sprintf("%.3gK", float64(result.SignatureHashes())/1000.0)
+		} else {
+			sigHashes = fmt.Sprintf("%d", result.SignatureHashes())
+		}
 		t.AppendRow(table.Row{
 			id,                       // "i",
 			result.HypertreeHeight(), // "h",
@@ -124,7 +133,7 @@ func main() {
 			result.LgW,               // "lg_w",
 			result.M(),               // "m",
 			result.SignatureSize(),   // "sig bytes",
-			sigHashesMillions,        // "sign time",
+			sigHashes,                // "sign time",
 			result.VerifyHashes(),    // "verify time",
 			result.SignaturesAtLevel(*fallbackSecurityLevel), // "sigs at 112",
 		})
