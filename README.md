@@ -7,7 +7,7 @@ parameter sets for firmware and software signing.
 
 This project is heavily based on (and is tested against) Scott Fluhrer's work at
 https://github.com/sfluhrer/sphincs-param-set-search, and Scott Fluhrer and
-Quynh Dang's papaer "Smaller Sphincs+" [^1]. This project allows a greater
+Quynh Dang's paper "Smaller Sphincs+" [^1]. This project allows a greater
 variety of searches across the parameter set space of SLH-DSA, to customize the
 search for the constraints of firmware and software signing.
 
