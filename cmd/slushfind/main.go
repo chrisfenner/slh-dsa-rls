@@ -30,6 +30,9 @@ var (
 	minSignatureHashes    = flag.Int64("min_sig_hashes", 0, "minimum number of hashes to compute a signature")
 	maxSignatureHashes    = flag.Int64("max_sig_hashes", 10000000, "maximum number of hashes to compute a signature")
 	maxVerifyHashes       = flag.Int64("max_verify_hashes", 2000, "maximum number of hashes to verify a signature")
+	sigSizeWeight         = flag.Float64("eval_sig_size", 0.5, "how much to consider signature size in the evaluation function")
+	sigCostWeight         = flag.Float64("eval_sig_hashes", 0.0, "how much to consider signature cost in hashes in the evaluation function")
+	verifyCostWeight      = flag.Float64("eval_verify_hashes", 0.5, "how much to consider verification cost in the evaluation function")
 )
 
 func main() {
@@ -50,8 +53,23 @@ func main() {
 		SignatureSize:       func(sz int) bool { return sz <= *maxSignatureSize },
 		SignatureHashes:     func(hashes int64) bool { return *minSignatureHashes < hashes && hashes < *maxSignatureHashes },
 		VerifyHashes:        func(hashes int64) bool { return hashes < *maxVerifyHashes },
-		Compare:             func(a, b *slhdsa.ParameterSet) bool { return a.SignatureSize() < b.SignatureSize() },
-		CandidateCount:      20,
+		Compare: func(a, b *slhdsa.ParameterSet) bool {
+			var aCost, bCost float64
+			if *sigSizeWeight != 0 {
+				aCost += *sigSizeWeight * math.Log(float64(a.SignatureSize()))
+				bCost += *sigSizeWeight * math.Log(float64(b.SignatureSize()))
+			}
+			if *sigCostWeight != 0 {
+				aCost += *sigCostWeight * math.Log(float64(a.SignatureHashes()))
+				bCost += *sigCostWeight * math.Log(float64(b.SignatureHashes()))
+			}
+			if *verifyCostWeight != 0 {
+				aCost += *verifyCostWeight * math.Log(float64(a.VerifyHashes()))
+				bCost += *verifyCostWeight * math.Log(float64(b.VerifyHashes()))
+			}
+			return aCost < bCost
+		},
+		CandidateCount: 20,
 	}
 
 	results := search.Search(&searchParams)
