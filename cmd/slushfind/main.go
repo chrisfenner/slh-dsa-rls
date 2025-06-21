@@ -113,7 +113,7 @@ func main() {
 		} else {
 			id = fmt.Sprintf("%d", i+1)
 		}
-		sigHashesMillions := fmt.Sprintf("%.2fM", float64(result.SignatureHashes())/1000000.0)
+		sigHashesMillions := fmt.Sprintf("%dM", result.SignatureHashes()/1000000)
 		t.AppendRow(table.Row{
 			id,                       // "i",
 			result.HypertreeHeight(), // "h",
