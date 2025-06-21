@@ -33,6 +33,7 @@ var (
 	sigSizeWeight         = flag.Float64("eval_sig_size", 0.5, "how much to consider signature size in the evaluation function")
 	sigCostWeight         = flag.Float64("eval_sig_hashes", 0.0, "how much to consider signature cost in hashes in the evaluation function")
 	verifyCostWeight      = flag.Float64("eval_verify_hashes", 0.5, "how much to consider verification cost in the evaluation function")
+	tableFormat           = flag.String("table_format", "console", "style for the output, one of ('console', 'markdown', 'csv')")
 )
 
 func main() {
@@ -40,6 +41,21 @@ func main() {
 	extraArgs := flag.Args()
 	if len(extraArgs) != 0 {
 		fmt.Fprintf(os.Stderr, "unrecognized arguments: %v", strings.Join(extraArgs, ", "))
+		os.Exit(1)
+	}
+
+	t := table.NewWriter()
+	var render func() string
+	switch strings.ToLower(*tableFormat) {
+	case "console":
+		render = t.Render
+	case "markdown":
+		render = t.RenderMarkdown
+	case "csv":
+		render = t.RenderCSV
+	default:
+		fmt.Fprintf(os.Stderr, "unrecognized table format: %v", *tableFormat)
+		os.Exit(1)
 	}
 
 	searchParams := search.Parameters{
@@ -74,7 +90,6 @@ func main() {
 
 	results := search.Search(&searchParams)
 
-	t := table.NewWriter()
 	t.AppendHeader(table.Row{
 		"i",
 		"h",
@@ -110,5 +125,5 @@ func main() {
 	t.SetStyle(table.StyleColoredDark)
 	t.Style().Title.Align = text.AlignCenter
 	t.SetTitle(fmt.Sprintf("Target security level %d, 2^%.1f signatures", *targetSecurityLevel, *minSignatureCount))
-	fmt.Println(t.Render())
+	fmt.Println(render())
 }
