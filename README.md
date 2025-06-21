@@ -1,7 +1,9 @@
 # Relatively Little Signatures for SLH-DSA
 
 This repository contains a tool to search the solution space for SLH-DSA
-parameter sets for firmware and software signing.
+parameter sets for firmware and software signing. It also contains some
+suggested parameter sets for firmware and software signin, found using
+this tool.
 
 ## Prior Work
 
