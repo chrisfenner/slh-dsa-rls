@@ -7,10 +7,29 @@ this tool, at the 2^20 & 2^30 signature levels (for the case that NIST chooses
 to standardize separate parameter sets for firmware and software signing) and
 2^24 signatures (for a single combined software/firmware use-case)
 
+## Outline
+
+- [Prior Work](#prior-work)
+- [How to Build](#how-to-build)
+- [How to Use](#how-to-use)
+- [Parameter Sets](#parameter-sets)
+  - [2^20 Signatures](#220-signatures) (Firmware Signing)
+    - [Level 1](#target-security-level-128-2200-signatures)
+    - [Level 3](#target-security-level-192-2200-signatures)
+    - [Level 5](#target-security-level-256-2200-signatures)
+  - [2^24 Signatures](#224-signatures) (Combined Software/Firmware Signing)
+    - [Level 1](#target-security-level-128-2240-signatures)
+    - [Level 3](#target-security-level-192-2240-signatures)
+    - [Level 5](#target-security-level-256-2240-signatures)
+  - [2^30 Signatures](#220-signatures) (Software Signing)
+    - [Level 1](#target-security-level-128-2240-signatures)
+    - [Level 3](#target-security-level-192-2240-signatures)
+    - [Level 5](#target-security-level-256-2240-signatures)
+
 ## Prior Work
 
 This project is heavily based on (and is tested against) Scott Fluhrer's work at
-https://github.com/sfluhrer/sphincs-param-set-search, and Scott Fluhrer and
+<https://github.com/sfluhrer/sphincs-param-set-search>, and Scott Fluhrer and
 Quynh Dang's paper "Smaller Sphincs+" [^1]. This project allows a greater
 variety of searches across the parameter set space of SLH-DSA, to customize the
 search for the constraints of firmware and software signing.
