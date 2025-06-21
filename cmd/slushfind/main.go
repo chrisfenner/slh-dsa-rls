@@ -107,12 +107,7 @@ func main() {
 	})
 
 	for i, result := range results {
-		var id string
-		if *namePrefix != "" {
-			id = fmt.Sprintf("%s-%d", *namePrefix, i+1)
-		} else {
-			id = fmt.Sprintf("%d", i+1)
-		}
+		id := fmt.Sprintf("%s%d", *namePrefix, i+1)
 		var sigHashes string
 		if result.SignatureHashes() > 1e9 {
 			sigHashes = fmt.Sprintf("%.3gB", float64(result.SignatureHashes())/1000000000.0)
