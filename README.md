@@ -2,8 +2,10 @@
 
 This repository contains a tool to search the solution space for SLH-DSA
 parameter sets for firmware and software signing. It also contains some
-suggested parameter sets for firmware and software signin, found using
-this tool.
+suggested parameter sets for firmware and software signing, found using
+this tool, at the 2^20 & 2^30 signature levels (for the case that NIST chooses
+to standardize separate parameter sets for firmware and software signing) and
+2^24 signatures (for a single combined software/firmware use-case)
 
 ## Prior Work
 
@@ -147,6 +149,109 @@ comparing parameter sets within these constraints.
 | rls256fw18 | 21 | 1 | 21 | 22 | 14 | 3 | 42 | 13888 | 1.69B | 706 | 29.26 |
 | rls256fw19 | 19 | 1 | 19 | 24 | 13 | 3 | 42 | 13920 | 1.03B | 707 | 28.22 |
 | rls256fw20 | 21 | 1 | 21 | 16 | 19 | 3 | 41 | 13920 | 1.52B | 707 | 26.69 |
+
+### 2^24 signatures
+
+The following parameter sets are generated for the case that NIST would prefer
+to standardize a single set of parameters that address the software/firmware
+signing scenarios together.
+
+As in the 2^24 parameter sets search, the *minimum* number of hashes required
+for signing is 900 million.
+
+A 2^24-use key that is used to sign for 30 years should be rate-limited to one
+signature per ~1 minute (30 years / (2^24) = 56 seconds). Per [^1], a typical
+HSM's hash rate is less than 1 million hashes per second, so these parameter
+sets more than enforce rate-limiting due to their high signing cost on typical
+HSM hardware. Depending on the chosen parameter set, around 20 typical HSMs
+distributing the signing workload will still not exceed the rate limit.
+
+Other search constraints:
+
+- max signature hashes: 2B to keep signing reasonable
+- max signature size: 4096/8192/16384 bytes for level 1/3/5 to be competitive
+  with other suggested reduced-size parameter sets, rounding up to multiples
+  of 4096 (a common page size boundary)
+- max verify hashes: 1000
+
+As with the 2^20 search, verification time and signature size are the most
+important factors, so the search weights them (by logarithm) evenly when
+comparing parameter sets within these constraints.
+
+#### Target security level 128, 2^24.0 signatures
+
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 112 |
+| --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| --- | ---:| ---:|
+| rls128c1 | 22 | 1 | 22 | 24 | 6 | 2 | 21 | 3856 | 1.45B | 311 | 27.25 |
+| rls128c2 | 22 | 1 | 22 | 21 | 7 | 2 | 22 | 3920 | 1.19B | 315 | 26.87 |
+| rls128c3 | 21 | 1 | 21 | 25 | 6 | 2 | 22 | 3936 | 1.18B | 316 | 27.29 |
+| rls128c4 | 22 | 1 | 22 | 25 | 6 | 2 | 22 | 3952 | 1.75B | 317 | 28.29 |
+| rls128c5 | 22 | 1 | 22 | 24 | 6 | 3 | 21 | 3504 | 1.85B | 359 | 27.25 |
+| rls128c6 | 20 | 1 | 20 | 26 | 6 | 2 | 23 | 4016 | 1.5B | 321 | 27.31 |
+| rls128c7 | 22 | 1 | 22 | 19 | 8 | 2 | 22 | 4016 | 1.16B | 321 | 26.85 |
+| rls128c8 | 22 | 1 | 22 | 21 | 7 | 3 | 22 | 3568 | 1.6B | 363 | 26.87 |
+| rls128c9 | 21 | 1 | 21 | 26 | 6 | 2 | 23 | 4032 | 1.78B | 322 | 28.31 |
+| rls128c10 | 22 | 1 | 22 | 22 | 7 | 2 | 23 | 4032 | 1.24B | 322 | 27.93 |
+| rls128c11 | 21 | 1 | 21 | 25 | 6 | 3 | 22 | 3584 | 1.38B | 364 | 27.29 |
+| rls128c12 | 22 | 1 | 22 | 17 | 9 | 2 | 23 | 4048 | 1.15B | 323 | 26.32 |
+| rls128c13 | 20 | 1 | 20 | 26 | 6 | 3 | 23 | 3664 | 1.6B | 369 | 27.31 |
+| rls128c14 | 22 | 1 | 22 | 19 | 8 | 3 | 22 | 3664 | 1.56B | 369 | 26.85 |
+| rls128c15 | 21 | 1 | 21 | 26 | 6 | 3 | 23 | 3680 | 1.98B | 370 | 28.31 |
+| rls128c16 | 22 | 1 | 22 | 22 | 7 | 3 | 23 | 3680 | 1.64B | 370 | 27.93 |
+| rls128c17 | 22 | 1 | 22 | 17 | 9 | 3 | 23 | 3696 | 1.56B | 371 | 26.32 |
+| rls128c18 | 21 | 1 | 21 | 23 | 7 | 3 | 24 | 3776 | 952M | 376 | 27.97 |
+| rls128c19 | 22 | 1 | 22 | 20 | 8 | 3 | 23 | 3792 | 1.58B | 377 | 27.92 |
+| rls128c20 | 22 | 1 | 22 | 23 | 7 | 3 | 24 | 3792 | 1.73B | 377 | 28.97 |
+
+#### Target security level 192, 2^24.0 signatures
+
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 128 |
+| --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| --- | ---:| ---:|
+| rls192c1 | 21 | 1 | 21 | 23 | 10 | 3 | 32 | 7896 | 1.38B | 532 | 30.65 |
+| rls192c2 | 20 | 1 | 20 | 24 | 10 | 3 | 33 | 8112 | 1.07B | 541 | 29.66 |
+| rls192c3 | 21 | 1 | 21 | 24 | 10 | 3 | 33 | 8136 | 1.63B | 542 | 30.66 |
+| rls192c4 | 21 | 1 | 21 | 20 | 12 | 3 | 33 | 8184 | 1.17B | 544 | 30.32 |
+| rls192c5 | 21 | 1 | 21 | 23 | 10 | 4 | 32 | 7512 | 1.97B | 672 | 30.65 |
+| rls192c6 | 20 | 1 | 20 | 24 | 10 | 4 | 33 | 7728 | 1.36B | 681 | 29.66 |
+| rls192c7 | 20 | 1 | 20 | 22 | 11 | 4 | 34 | 7800 | 996M | 684 | 29.65 |
+| rls192c8 | 21 | 1 | 21 | 20 | 12 | 4 | 33 | 7800 | 1.75B | 684 | 30.32 |
+| rls192c9 | 21 | 1 | 21 | 22 | 11 | 4 | 34 | 7824 | 1.85B | 685 | 30.65 |
+| rls192c10 | 19 | 1 | 19 | 25 | 10 | 4 | 35 | 7944 | 1.44B | 690 | 28.67 |
+| rls192c11 | 20 | 1 | 20 | 25 | 10 | 4 | 35 | 7968 | 1.86B | 691 | 29.67 |
+| rls192c12 | 21 | 1 | 21 | 19 | 13 | 4 | 34 | 7992 | 1.74B | 692 | 30.14 |
+| rls192c13 | 20 | 1 | 20 | 21 | 12 | 4 | 35 | 8064 | 933M | 695 | 29.65 |
+| rls192c14 | 20 | 1 | 20 | 23 | 11 | 4 | 35 | 8064 | 1.13B | 695 | 29.66 |
+| rls192c15 | 21 | 1 | 21 | 21 | 12 | 4 | 35 | 8088 | 1.79B | 696 | 30.65 |
+| rls192c16 | 21 | 1 | 21 | 23 | 11 | 4 | 35 | 8088 | 1.99B | 696 | 30.66 |
+| rls192c17 | 21 | 1 | 21 | 18 | 14 | 4 | 35 | 8136 | 1.73B | 698 | 29.84 |
+| rls192c18 | 20 | 1 | 20 | 24 | 10 | 5 | 33 | 7512 | 1.91B | 945 | 29.66 |
+| rls192c19 | 20 | 1 | 20 | 22 | 11 | 5 | 34 | 7584 | 1.55B | 948 | 29.65 |
+| rls192c20 | 19 | 1 | 19 | 25 | 10 | 5 | 35 | 7728 | 1.71B | 954 | 28.67 |
+
+#### Target security level 256, 2^24.0 signatures
+
+| id | h | d | h' | a | k | w | m | sig bytes | sign time | verify time | sigs at 192 |
+| --- | ---:| ---:| ---:| ---:| ---:| ---:| ---:| ---:| --- | ---:| ---:|
+| rls256c1 | 21 | 1 | 21 | 22 | 14 | 2 | 42 | 15264 | 1.3B | 612 | 29.26 |
+| rls256c2 | 21 | 1 | 21 | 24 | 13 | 2 | 42 | 15360 | 1.77B | 615 | 30.22 |
+| rls256c3 | 21 | 1 | 21 | 21 | 15 | 2 | 43 | 15520 | 1.21B | 620 | 29.17 |
+| rls256c4 | 20 | 1 | 20 | 23 | 14 | 2 | 44 | 15680 | 912M | 625 | 29.27 |
+| rls256c5 | 21 | 1 | 21 | 22 | 14 | 3 | 42 | 13888 | 1.69B | 706 | 29.26 |
+| rls256c6 | 19 | 1 | 19 | 25 | 13 | 2 | 44 | 15712 | 1.59B | 626 | 28.73 |
+| rls256c7 | 21 | 1 | 21 | 23 | 14 | 2 | 44 | 15712 | 1.47B | 626 | 30.27 |
+| rls256c8 | 21 | 1 | 21 | 20 | 16 | 2 | 43 | 15712 | 1.17B | 626 | 28.96 |
+| rls256c9 | 20 | 1 | 20 | 25 | 13 | 2 | 44 | 15744 | 1.87B | 627 | 29.73 |
+| rls256c10 | 21 | 1 | 21 | 19 | 17 | 2 | 44 | 15840 | 1.15B | 630 | 28.65 |
+| rls256c11 | 21 | 1 | 21 | 21 | 15 | 3 | 43 | 14144 | 1.61B | 714 | 29.17 |
+| rls256c12 | 21 | 1 | 21 | 22 | 15 | 2 | 45 | 16000 | 1.31B | 635 | 30.18 |
+| rls256c13 | 19 | 1 | 19 | 24 | 14 | 2 | 45 | 16096 | 985M | 638 | 28.73 |
+| rls256c14 | 20 | 1 | 20 | 23 | 14 | 3 | 44 | 14304 | 1.11B | 719 | 29.27 |
+| rls256c15 | 20 | 1 | 20 | 24 | 14 | 2 | 45 | 16128 | 1.26B | 639 | 29.73 |
+| rls256c16 | 19 | 1 | 19 | 25 | 13 | 3 | 44 | 14336 | 1.69B | 720 | 28.73 |
+| rls256c17 | 21 | 1 | 21 | 23 | 14 | 3 | 44 | 14336 | 1.87B | 720 | 30.27 |
+| rls256c18 | 21 | 1 | 21 | 20 | 16 | 3 | 43 | 14336 | 1.56B | 720 | 28.96 |
+| rls256c19 | 21 | 1 | 21 | 24 | 14 | 2 | 45 | 16160 | 1.82B | 640 | 30.73 |
+| rls256c20 | 21 | 1 | 21 | 21 | 16 | 2 | 45 | 16224 | 1.22B | 642 | 29.98 |
 
 ### 2^30 signatures
 

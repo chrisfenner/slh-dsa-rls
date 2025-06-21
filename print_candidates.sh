@@ -54,6 +54,57 @@ go run ./cmd/slushfind \
 
 echo
 
+# 2^24 for a single combined fw/sw parameter set that safely can be used once
+# per minute for 30 years
+
+go run ./cmd/slushfind \
+    --name_prefix=rls128c \
+    --target_security_level=128 \
+    --min_sig_count=24 \
+    --max_sig_size=4096 \
+    --min_sig_hashes=900000000 \
+    --max_sig_hashes=2000000000 \
+    --max_verify_hashes=1000 \
+    --fallback_security_level=112 \
+    --eval_sig_size=0.5 \
+    --eval_sig_hashes=0 \
+    --eval_verify_hashes=0.5 \
+    --table_format=markdown \
+
+echo
+
+go run ./cmd/slushfind \
+    --name_prefix=rls192c \
+    --target_security_level=192 \
+    --min_sig_count=24 \
+    --max_sig_size=8192 \
+    --min_sig_hashes=900000000 \
+    --max_sig_hashes=2000000000 \
+    --max_verify_hashes=1000 \
+    --fallback_security_level=128 \
+    --eval_sig_size=0.5 \
+    --eval_sig_hashes=0 \
+    --eval_verify_hashes=0.5 \
+    --table_format=markdown \
+
+echo
+
+go run ./cmd/slushfind \
+    --name_prefix=rls256c \
+    --target_security_level=256 \
+    --min_sig_count=24 \
+    --max_sig_size=16384 \
+    --min_sig_hashes=900000000 \
+    --max_sig_hashes=2000000000 \
+    --max_verify_hashes=1000 \
+    --fallback_security_level=192 \
+    --eval_sig_size=0.5 \
+    --eval_sig_hashes=0 \
+    --eval_verify_hashes=0.5 \
+    --table_format=markdown \
+
+echo
+
 # 2^30 for software signing
 
 go run ./cmd/slushfind \
