@@ -144,7 +144,7 @@ comparing parameter sets.
 The intended purpose of the 2^30-limit signature parameter sets is software
 signing. The *maximum* number of hashes required for signing is 100 million.
 
-A key that is used to sign for 30 years should be rate-limited to one signature
+A 2^30-use key that is used to sign for 30 years should be rate-limited to one signature
 per ~1 second (30 years / (2^30) = 0.9 seconds). Per [^1], a typical HSM's hash
 rate is less than 1 million hashes per second, so these parameter sets more than
 enforce rate-limiting due to their high signing cost on typical HSM hardware.
