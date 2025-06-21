@@ -71,12 +71,12 @@ func (p *Parameters) candidates() iter.Seq[*slhdsa.ParameterSet] {
 func Search(params *Parameters) []slhdsa.ParameterSet {
 	result := make([]slhdsa.ParameterSet, 0, params.CandidateCount+1)
 	candidateQueue := make(chan *slhdsa.ParameterSet)
-	var wg sync.WaitGroup
+	var wg1, wg2 sync.WaitGroup
 
 	// Create a goroutine that just reads candidates out of the queue and inserts them into the result
-	wg.Add(1)
+	wg1.Add(1)
 	go func() {
-		defer wg.Done()
+		defer wg1.Done()
 		for {
 			candidate, ok := <-candidateQueue
 			if !ok {
@@ -100,9 +100,9 @@ func Search(params *Parameters) []slhdsa.ParameterSet {
 
 	// Search the entire acceptable solution space, adding candidates to the queue
 	for candidate := range params.candidates() {
-		wg.Add(1)
+		wg2.Add(1)
 		go func() {
-			defer wg.Done()
+			defer wg2.Done()
 			// Check that the signature size is acceptable
 			if !params.SignatureSize(candidate.SignatureSize()) {
 				return
@@ -124,9 +124,9 @@ func Search(params *Parameters) []slhdsa.ParameterSet {
 			candidateQueue <- candidate
 		}()
 	}
+	wg2.Wait()
 	close(candidateQueue)
-
-	wg.Wait()
+	wg1.Wait()
 
 	return result
 }
