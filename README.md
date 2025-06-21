@@ -175,7 +175,7 @@ The following parameter sets are generated for the case that NIST would prefer
 to standardize a single set of parameters that address the software/firmware
 signing scenarios together.
 
-As in the 2^24 parameter sets search, the *minimum* number of hashes required
+As in the 2^20 parameter sets search, the *minimum* number of hashes required
 for signing is 900 million.
 
 A 2^24-use key that is used to sign for 30 years should be rate-limited to one
