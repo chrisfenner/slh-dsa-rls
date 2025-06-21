@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chrisfenner/slushfind/pkg/search"
-	"github.com/chrisfenner/slushfind/pkg/slhdsa"
+	"github.com/chrisfenner/slh-dsa-rls/pkg/search"
+	"github.com/chrisfenner/slh-dsa-rls/pkg/slhdsa"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
 )

@@ -8,7 +8,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/chrisfenner/slushfind/pkg/slhdsa"
+	"github.com/chrisfenner/slh-dsa-rls/pkg/slhdsa"
 )
 
 // Parameters defines the parameters of a search space.
