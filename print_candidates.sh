@@ -65,7 +65,8 @@ go run ./cmd/slushfind \
     --min_sig_count=30 \
     --min_sig_count_at_overuse=40 \
     --max_sig_size=4096 \
-    --max_sig_hashes=3000000000 \
+    --max_sig_hashes=1500000000 \
+    --max_cached_sig_hashes=300000000 \
     --max_verify_hashes=100000 \
     --eval_sig_size=1.0 \
     --eval_sig_hashes=0 \
@@ -81,7 +82,8 @@ go run ./cmd/slushfind \
     --min_sig_count=30 \
     --min_sig_count_at_overuse=40 \
     --max_sig_size=8192 \
-    --max_sig_hashes=3000000000 \
+    --max_sig_hashes=1500000000 \
+    --max_cached_sig_hashes=300000000 \
     --max_verify_hashes=100000 \
     --eval_sig_size=1.0 \
     --eval_sig_hashes=0 \
@@ -97,7 +99,8 @@ go run ./cmd/slushfind \
     --min_sig_count=30 \
     --min_sig_count_at_overuse=40 \
     --max_sig_size=16384 \
-    --max_sig_hashes=3000000000 \
+    --max_sig_hashes=1500000000 \
+    --max_cached_sig_hashes=300000000 \
     --max_verify_hashes=100000 \
     --eval_sig_size=1.0 \
     --eval_sig_hashes=0 \
