@@ -10,12 +10,12 @@ set -e
 # physically able to exceed that on typical HSM hardware in 2025
 
 go run ./cmd/slushfind \
-    --name_prefix=rls128c \
+    --name_prefix=rls128cs \
     --target_security_level=128 \
     --overuse_security_level=112 \
     --min_sig_count=24 \
     --max_sig_size=4096 \
-    --max_sig_hashes=2000000000 \
+    --max_sig_hashes=3000000000 \
     --max_verify_hashes=1000 \
     --eval_sig_size=0.5 \
     --eval_sig_hashes=0 \
@@ -25,12 +25,12 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls192c \
+    --name_prefix=rls192cs \
     --target_security_level=192 \
     --overuse_security_level=128 \
     --min_sig_count=24 \
     --max_sig_size=8192 \
-    --max_sig_hashes=2000000000 \
+    --max_sig_hashes=3000000000 \
     --max_verify_hashes=1000 \
     --eval_sig_size=0.5 \
     --eval_sig_hashes=0 \
@@ -40,12 +40,12 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls256c \
+    --name_prefix=rls256cs \
     --target_security_level=256 \
     --overuse_security_level=192 \
     --min_sig_count=24 \
     --max_sig_size=16384 \
-    --max_sig_hashes=2000000000 \
+    --max_sig_hashes=3000000000 \
     --max_verify_hashes=1000 \
     --eval_sig_size=0.5 \
     --eval_sig_hashes=0 \
@@ -59,14 +59,13 @@ echo
 # retain "good enough" strength at one signature per millisecond for 30 years
 
 go run ./cmd/slushfind \
-    --name_prefix=rls128g \
+    --name_prefix=rls128gp \
     --target_security_level=128 \
     --overuse_security_level=112 \
     --min_sig_count=30 \
     --min_sig_count_at_overuse=40 \
     --max_sig_size=4096 \
-    --max_cached_sig_hashes=1000000 \
-    --max_sig_hashes=2000000000 \
+    --max_sig_hashes=3000000000 \
     --max_verify_hashes=100000 \
     --eval_sig_size=1.0 \
     --eval_sig_hashes=0 \
@@ -76,14 +75,13 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls192g \
+    --name_prefix=rls192gp \
     --target_security_level=192 \
     --overuse_security_level=128 \
     --min_sig_count=30 \
     --min_sig_count_at_overuse=40 \
     --max_sig_size=8192 \
-    --max_cached_sig_hashes=1000000 \
-    --max_sig_hashes=2000000000 \
+    --max_sig_hashes=3000000000 \
     --max_verify_hashes=100000 \
     --eval_sig_size=1.0 \
     --eval_sig_hashes=0 \
@@ -93,14 +91,13 @@ go run ./cmd/slushfind \
 echo
 
 go run ./cmd/slushfind \
-    --name_prefix=rls256g \
+    --name_prefix=rls256gp \
     --target_security_level=256 \
     --overuse_security_level=192 \
     --min_sig_count=30 \
     --min_sig_count_at_overuse=40 \
     --max_sig_size=16384 \
-    --max_cached_sig_hashes=1000000 \
-    --max_sig_hashes=2000000000 \
+    --max_sig_hashes=3000000000 \
     --max_verify_hashes=100000 \
     --eval_sig_size=1.0 \
     --eval_sig_hashes=0 \
