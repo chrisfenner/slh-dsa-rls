@@ -9,6 +9,8 @@ import (
 type ParameterSet struct {
 	// The target security level in bits of the signature (e.g., 128 for Level 1)
 	TargetSecurityLevel int
+	// The overuse security level in bits of the signature (e.g., 112 bits)
+	OveruseSecurityLevel int
 	// The height of each XMSS key
 	HPrime int
 	// The number of layers of one-time signatures and Merkle trees within the hypertree
@@ -21,10 +23,12 @@ type ParameterSet struct {
 	T int
 
 	// Cached values
-	securityLevelSignatureCount      *float64
-	securityLevel                    *float64
-	checkSecurityLevelSignatureCount *float64
-	checkedSecurityLevel             *bool
+	securityLevelSignatureCount             *float64
+	securityLevel                           *float64
+	checkSecurityLevelSignatureCount        *float64
+	checkedSecurityLevel                    *bool
+	checkOveruseSecurityLevelSignatureCount *float64
+	checkedOveruseSecurityLevel             *bool
 }
 
 // The height of each XMSS key
@@ -141,9 +145,26 @@ func (p *ParameterSet) CheckSecurityLevel(m float64) bool {
 	return result
 }
 
+func (p *ParameterSet) CheckOveruseSecurityLevel(m float64) bool {
+	if p.checkOveruseSecurityLevelSignatureCount != nil && *p.checkOveruseSecurityLevelSignatureCount == m {
+		return *p.checkedOveruseSecurityLevel
+	}
+
+	// Compute & cache
+	p.checkOveruseSecurityLevelSignatureCount = &m
+	result := p.checkOveruseSecurityLevel(m)
+	p.checkedOveruseSecurityLevel = &result
+	return result
+}
+
 // Checks if the parameter set meets its target security level for 2^m signatures
 func (p *ParameterSet) checkSecurityLevel(m float64) bool {
 	return p.computeSecurityLevel(m) >= float64(p.TargetSecurityLevel)
+}
+
+// Checks if the parameter set meets its target overuse security level for 2^m signatures
+func (p *ParameterSet) checkOveruseSecurityLevel(m float64) bool {
+	return p.computeSecurityLevel(m) >= float64(p.OveruseSecurityLevel)
 }
 
 // The log_2 of the number of signatures that can be performed while retaining the security level
@@ -188,6 +209,12 @@ func (p *ParameterSet) SignatureHashes() int64 {
 	cost_hypertree := int64(p.D) * ((cost_ots+1)*(1<<p.HPrime) - 1)
 	cost_fors_tree := int64(3)*(1<<int64(p.T)) - 1
 	return 3 + cost_hypertree + int64(p.K)*cost_fors_tree
+}
+
+// The number of hash operations required to produce a signature if the hypertree is cached.
+func (p *ParameterSet) CachedSignatureHashes() int64 {
+	cost_fors_tree := int64(3)*(1<<int64(p.T)) - 1
+	return 3 + int64(p.K)*cost_fors_tree
 }
 
 // The number of hash operations required to verify a signature

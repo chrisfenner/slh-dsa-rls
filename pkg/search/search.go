@@ -17,6 +17,10 @@ type Parameters struct {
 	TargetSecurityLevel int
 	// The minimum number of signatures this parameter set must be able to support at full security level
 	MinSignatures float64
+	// The overuse security level for this search (ignored if <= 0 or if MinOveruseSignatures <= 0)
+	OveruseSecurityLevel int
+	// The minimum number of signatures this parameter set must be able to support at overuse security level (ignored if <= 0 or if OveruseSecurityLevel <= 0)
+	MinOveruseSignatures float64
 	// Acceptable XMSS key heights
 	HPrime []int
 	// Acceptable number of layers of one-time signatures and Merkle trees within the hypertree
@@ -32,6 +36,8 @@ type Parameters struct {
 	SignatureSize func(int) bool
 	// A function that determines whether a given signature cost is acceptable
 	SignatureHashes func(int64) bool
+	// A function that determines whether a given signature cost is acceptable (when 1 layer of the hypertree is cached)
+	CachedSignatureHashes func(int64) bool
 	// A function that determines whether a given verification cost is acceptable
 	VerifyHashes func(int64) bool
 	// A function that compares two parameter sets, returns true if p1 is "better" than p2
@@ -48,12 +54,13 @@ func (p *Parameters) candidates() iter.Seq[*slhdsa.ParameterSet] {
 					for _, k := range p.K {
 						for _, t := range p.T {
 							candidate := slhdsa.ParameterSet{
-								TargetSecurityLevel: p.TargetSecurityLevel,
-								HPrime:              hPrime,
-								D:                   d,
-								LgW:                 lgW,
-								K:                   k,
-								T:                   t,
+								TargetSecurityLevel:  p.TargetSecurityLevel,
+								OveruseSecurityLevel: p.OveruseSecurityLevel,
+								HPrime:               hPrime,
+								D:                    d,
+								LgW:                  lgW,
+								K:                    k,
+								T:                    t,
 							}
 							// Yield the candidate
 							if !yield(&candidate) {
@@ -103,21 +110,35 @@ func Search(params *Parameters) []slhdsa.ParameterSet {
 		wg2.Add(1)
 		go func() {
 			defer wg2.Done()
+
 			// Check that the signature size is acceptable
 			if !params.SignatureSize(candidate.SignatureSize()) {
 				return
 			}
+
 			// Check that the signature work is acceptable
 			if !params.SignatureHashes(candidate.SignatureHashes()) {
 				return
 			}
+			if !params.CachedSignatureHashes(candidate.CachedSignatureHashes()) {
+				return
+			}
+
 			// Check that the verify work is acceptable
 			if !params.VerifyHashes(candidate.VerifyHashes()) {
 				return
 			}
+
 			// Check that the security level is acceptable
 			if !candidate.CheckSecurityLevel(math.Log2(params.MinSignatures)) {
 				return
+			}
+
+			// Check overuse security (if applicable)
+			if params.OveruseSecurityLevel > 0 && params.MinOveruseSignatures > 0 {
+				if !candidate.CheckOveruseSecurityLevel(math.Log2(params.MinOveruseSignatures)) {
+					return
+				}
 			}
 
 			// Candidate is acceptable; enqueue it
