@@ -198,7 +198,7 @@ way up to 2^40 signatures).
 A 2^30-use key that is used to sign for 30 years should be rate-limited to one
 signature per ~1 second (30 years / (2^30) = 0.88 seconds). In order to hit 2^40
 signatures (the overuse scenario), the key would need to accidentally be used to
-sign a message every ~millisecond (30 years / (2^40) = 0.86 ms) for 30 years.
+sign a message every ~millisecond (30 years / (2^40) = 0.86 ms).
 
 Comparison criteria:
 
@@ -210,8 +210,7 @@ Other search constraints:
   - if the signer caches the hypertree: 10 million
   - otherwise: 2 billion (as in the code-signing case)
 - max signature size: 4096/8192/16384 bytes (as in the code-signing case)
-- max verify hashes: 100000 (although it is hard to find a parameter set
-  satisfying the above constraints that goes above 10k hashes for verification)
+- max verify hashes: 100000 (it is hard to actually reach this limit though)
 
 #### Target security level 128, 2^30 signatures
 
