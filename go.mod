@@ -2,7 +2,10 @@ module github.com/chrisfenner/slh-dsa-rls
 
 go 1.24.2
 
-require github.com/jedib0t/go-pretty v4.3.0+incompatible
+require (
+	github.com/jedib0t/go-pretty v4.3.0+incompatible
+	golang.org/x/term v0.33.0
+)
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
@@ -15,5 +18,5 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 )

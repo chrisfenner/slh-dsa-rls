@@ -53,7 +53,7 @@ func (p *ParameterSet) SecurityLevel(m float64) float64 {
 
 	// Compute & cache
 	p.securityLevelSignatureCount = &m
-	result := p.computeSecurityLevel(m)
+	result := p.ComputeSecurityLevel(m)
 	p.securityLevel = &result
 	return result
 }
@@ -61,7 +61,7 @@ func (p *ParameterSet) SecurityLevel(m float64) float64 {
 // Computes the exact security level of the parameter set for 2^m signatures
 // This is a Go translation of Scott Fluhrer's algorithm `compute_sec_level` from
 // https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
-func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
+func (p *ParameterSet) ComputeSecurityLevel(m float64) float64 {
 	// Lambda is the expected number of signatures per hypertree leaf at the specified number of signatures.
 	lambda := 0.0
 	if m > float64(p.HypertreeHeight()) {
@@ -130,7 +130,18 @@ func (p *ParameterSet) computeSecurityLevel(m float64) float64 {
 		}
 	}
 
-	return lambda*math.Log2(math.E) - log_sum
+	// We can't exceed the the target security level.
+	computed := lambda*math.Log2(math.E) - log_sum
+	if computed > float64(p.TargetSecurityLevel) {
+		return float64(p.TargetSecurityLevel)
+	}
+
+	// We also can't go below 0.
+	if computed < 0 {
+		return 0
+	}
+
+	return computed
 }
 
 func (p *ParameterSet) CheckSecurityLevel(m float64) bool {
@@ -159,12 +170,12 @@ func (p *ParameterSet) CheckOveruseSecurityLevel(m float64) bool {
 
 // Checks if the parameter set meets its target security level for 2^m signatures
 func (p *ParameterSet) checkSecurityLevel(m float64) bool {
-	return p.computeSecurityLevel(m) >= float64(p.TargetSecurityLevel)
+	return p.ComputeSecurityLevel(m) >= float64(p.TargetSecurityLevel)
 }
 
 // Checks if the parameter set meets its target overuse security level for 2^m signatures
 func (p *ParameterSet) checkOveruseSecurityLevel(m float64) bool {
-	return p.computeSecurityLevel(m) >= float64(p.OveruseSecurityLevel)
+	return p.ComputeSecurityLevel(m) >= float64(p.OveruseSecurityLevel)
 }
 
 // The log_2 of the number of signatures that can be performed while retaining the security level
@@ -173,12 +184,12 @@ func (p *ParameterSet) checkOveruseSecurityLevel(m float64) bool {
 func (p *ParameterSet) SignaturesAtLevel(target int) float64 {
 	// Scan for the number of signatures at a gross level (by integers)
 	lower := 0
-	for p.computeSecurityLevel(float64(lower+1)) > float64(target) {
+	for p.ComputeSecurityLevel(float64(lower+1)) > float64(target) {
 		lower++
 	}
 	// Now scan by hundreds
 	fract := 0
-	for p.computeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) > float64(target) {
+	for p.ComputeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) > float64(target) {
 		fract++
 	}
 	return float64(lower) + (float64(fract) / 100.0)
