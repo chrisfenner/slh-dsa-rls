@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	tableFormat                  = flag.String("table_format", "console", "style for the output, one of ('console', 'markdown', 'csv')")
+	tableFormat = flag.String("table_format", "console", "style for the output, one of ('console', 'markdown', 'csv')")
 )
 
 func main() {
@@ -36,7 +36,6 @@ func main() {
 
 type namedParms struct {
 	id string
-	overuse int
 	slhdsa.ParameterSet
 }
 
@@ -55,11 +54,11 @@ func mainErr() error {
 		if line == "" {
 			break
 		}
-		id, overuse, parm, err := getParameterSetFromLine(line)
+		id, parm, err := getParameterSetFromLine(line)
 		if err != nil {
 			return err
 		}
-		parms = append(parms, namedParms{id: id, overuse: overuse, ParameterSet: *parm})
+		parms = append(parms, namedParms{id: id, ParameterSet: *parm})
 	}
 
 	t := table.NewWriter()
@@ -94,19 +93,19 @@ func mainErr() error {
 
 	for _, parm := range parms {
 		t.AppendRow(table.Row{
-			parm.id,                  // "id",
-			parm.HypertreeHeight(), // "h",
-			parm.D,                 // "d",
-			parm.HPrime,            // "h'",
-			parm.T,                 // "a",
-			parm.K,                 // "k",
-			parm.LgW,               // "lg_w",
-			parm.M(),               // "m",
-			parm.SignatureSize(),   // "sig bytes",
+			parm.id,                      // "id",
+			parm.HypertreeHeight(),       // "h",
+			parm.D,                       // "d",
+			parm.HPrime,                  // "h'",
+			parm.T,                       // "a",
+			parm.K,                       // "k",
+			parm.LgW,                     // "lg_w",
+			parm.M(),                     // "m",
+			parm.SignatureSize(),         // "sig bytes",
 			parm.SignatureHashes(),       // "sign time",
 			parm.CachedSignatureHashes(), // "sign cached",
-			parm.VerifyHashes(),                           // "verify time",
-			parm.SignaturesAtLevel(parm.overuse), // "sigs at {fallbackSecurityLevel}",
+			parm.VerifyHashes(),          // "verify time",
+			parm.SignaturesAtLevel(parm.OveruseSecurityLevel), // "sigs at {fallbackSecurityLevel}",
 		})
 	}
 
@@ -118,47 +117,48 @@ func mainErr() error {
 	return nil
 }
 
-func getParameterSetFromLine(line string) (string, int, *slhdsa.ParameterSet, error) {
+func getParameterSetFromLine(line string) (string, *slhdsa.ParameterSet, error) {
 	split := strings.Split(line, " ")
 	if len(split) != 8 {
-		return "", 0, nil, fmt.Errorf("expected format: (id, overuse, n, d, h', a, k, lg_w); got %d fields", len(split))
+		return "", nil, fmt.Errorf("expected format: (id, overuse, n, d, h', a, k, lg_w); got %d fields", len(split))
 	}
 	id := split[0]
 	overuse, err := strconv.ParseInt(split[1], 10, 32)
 	if err != nil {
-		return "", 0, nil, fmt.Errorf("could not parse overuse from %q: %v", split[1], err)
+		return "", nil, fmt.Errorf("could not parse overuse from %q: %v", split[1], err)
 	}
 	n, err := strconv.ParseInt(split[2], 10, 32)
 	if err != nil {
-		return "", 0, nil, fmt.Errorf("could not parse n from %q: %v", split[2], err)
+		return "", nil, fmt.Errorf("could not parse n from %q: %v", split[2], err)
 	}
 	d, err := strconv.ParseInt(split[3], 10, 32)
 	if err != nil {
-		return "", 0, nil, fmt.Errorf("could not parse d from %q: %v", split[3], err)
+		return "", nil, fmt.Errorf("could not parse d from %q: %v", split[3], err)
 	}
 	hp, err := strconv.ParseInt(split[4], 10, 32)
 	if err != nil {
-		return "", 0, nil, fmt.Errorf("could not parse h' from %q: %v", split[4], err)
+		return "", nil, fmt.Errorf("could not parse h' from %q: %v", split[4], err)
 	}
 	a, err := strconv.ParseInt(split[5], 10, 32)
 	if err != nil {
-		return "", 0, nil, fmt.Errorf("could not parse a from %q: %v", split[5], err)
+		return "", nil, fmt.Errorf("could not parse a from %q: %v", split[5], err)
 	}
 	k, err := strconv.ParseInt(split[6], 10, 32)
 	if err != nil {
-		return "", 0, nil, fmt.Errorf("could not parse k from %q: %v", split[6], err)
+		return "", nil, fmt.Errorf("could not parse k from %q: %v", split[6], err)
 	}
 	lgw, err := strconv.ParseInt(split[7], 10, 32)
 	if err != nil {
-		return "", 0, nil, fmt.Errorf("could not parse lg_w from %q: %v", split[7], err)
+		return "", nil, fmt.Errorf("could not parse lg_w from %q: %v", split[7], err)
 	}
 
-	return id, int(overuse), &slhdsa.ParameterSet{
-		TargetSecurityLevel: int(n) * 8,
-		D:                   int(d),
-		HPrime:              int(hp),
-		T:                   int(a),
-		K:                   int(k),
-		LgW:                 int(lgw),
+	return id, &slhdsa.ParameterSet{
+		TargetSecurityLevel:  int(n) * 8,
+		OveruseSecurityLevel: int(overuse),
+		D:                    int(d),
+		HPrime:               int(hp),
+		T:                    int(a),
+		K:                    int(k),
+		LgW:                  int(lgw),
 	}, nil
 }
