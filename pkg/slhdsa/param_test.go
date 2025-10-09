@@ -20,6 +20,7 @@ func TestParameterSetCalculations(t *testing.T) {
 		SignatureHashes           int64
 		VerifyHashes              int64
 		ReducedTarget             int
+		SignaturesAtTarget        float64
 		SignaturesAtReducedTarget float64
 	}{
 		{
@@ -38,6 +39,7 @@ func TestParameterSetCalculations(t *testing.T) {
 			SignatureHashes:           89576,
 			VerifyHashes:              1353,
 			ReducedTarget:             112,
+			SignaturesAtTarget:        20.14,
 			SignaturesAtReducedTarget: 21.69,
 		},
 		{
@@ -56,6 +58,7 @@ func TestParameterSetCalculations(t *testing.T) {
 			SignatureHashes:           94956,
 			VerifyHashes:              2432,
 			ReducedTarget:             112,
+			SignaturesAtTarget:        26.99,
 			SignaturesAtReducedTarget: 30.79,
 		},
 		{
@@ -74,6 +77,7 @@ func TestParameterSetCalculations(t *testing.T) {
 			SignatureHashes:           553779196, // https://eprint.iacr.org/2024/018.pdf has 553779200, might be a precision issue
 			VerifyHashes:              4767,
 			ReducedTarget:             112,
+			SignaturesAtTarget:        21.92,
 			SignaturesAtReducedTarget: 30.75,
 		},
 		{
@@ -92,6 +96,7 @@ func TestParameterSetCalculations(t *testing.T) {
 			SignatureHashes:           9883638,
 			VerifyHashes:              9393,
 			ReducedTarget:             112,
+			SignaturesAtTarget:        30.72,
 			SignaturesAtReducedTarget: 35.92,
 		},
 		{
@@ -110,6 +115,7 @@ func TestParameterSetCalculations(t *testing.T) {
 			SignatureHashes:           849390,
 			VerifyHashes:              1487,
 			ReducedTarget:             128,
+			SignaturesAtTarget:        21.58,
 			SignaturesAtReducedTarget: 28.51,
 		},
 		{
@@ -128,6 +134,7 @@ func TestParameterSetCalculations(t *testing.T) {
 			SignatureHashes:           942693,
 			VerifyHashes:              11202,
 			ReducedTarget:             128,
+			SignaturesAtTarget:        50.3,
 			SignaturesAtReducedTarget: 55.34,
 		},
 	} {
@@ -146,6 +153,9 @@ func TestParameterSetCalculations(t *testing.T) {
 			}
 			if got, want := tc.Params.VerifyHashes(), tc.VerifyHashes; got != want {
 				t.Errorf("VerifyHashes = %v, want %v", got, want)
+			}
+			if got, want := tc.Params.SignaturesAtLevel(tc.Params.TargetSecurityLevel), tc.SignaturesAtTarget; !closeEnough(got, want) {
+				t.Errorf("SignaturesAt(%v) = %v, want %v", tc.Params.TargetSecurityLevel, got, want)
 			}
 			if got, want := tc.Params.SignaturesAtLevel(tc.ReducedTarget), tc.SignaturesAtReducedTarget; !closeEnough(got, want) {
 				t.Errorf("SignaturesAt(%v) = %v, want %v", tc.ReducedTarget, got, want)

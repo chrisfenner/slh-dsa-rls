@@ -184,12 +184,12 @@ func (p *ParameterSet) checkOveruseSecurityLevel(m float64) bool {
 func (p *ParameterSet) SignaturesAtLevel(target int) float64 {
 	// Scan for the number of signatures at a gross level (by integers)
 	lower := 0
-	for p.ComputeSecurityLevel(float64(lower+1)) > float64(target) {
+	for p.ComputeSecurityLevel(float64(lower+1)) >= float64(target) {
 		lower++
 	}
 	// Now scan by hundreds
 	fract := 0
-	for p.ComputeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) > float64(target) {
+	for p.ComputeSecurityLevel(float64(lower)+float64(fract)/100.0+0.005) >= float64(target) {
 		fract++
 	}
 	return float64(lower) + (float64(fract) / 100.0)
