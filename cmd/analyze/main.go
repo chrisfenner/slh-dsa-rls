@@ -77,6 +77,7 @@ func mainErr() error {
 
 	t.AppendHeader(table.Row{
 		"id",
+		"s",
 		"h",
 		"d",
 		"h'",
@@ -85,26 +86,27 @@ func mainErr() error {
 		"w",
 		"m",
 		"sig bytes",
-		"sign time",
-		"sign cached",
-		"verify time",
+		"sign work",
+		"verify work",
+		"sigs",
 		"sigs at reduced",
 	})
 
 	for _, parm := range parms {
 		t.AppendRow(table.Row{
-			parm.id,                      // "id",
-			parm.HypertreeHeight(),       // "h",
-			parm.D,                       // "d",
-			parm.HPrime,                  // "h'",
-			parm.T,                       // "a",
-			parm.K,                       // "k",
-			parm.LgW,                     // "lg_w",
-			parm.M(),                     // "m",
-			parm.SignatureSize(),         // "sig bytes",
-			parm.SignatureHashes(),       // "sign time",
-			parm.CachedSignatureHashes(), // "sign cached",
-			parm.VerifyHashes(),          // "verify time",
+			parm.id,                  // "id",
+			parm.TargetSecurityLevel, // "s",
+			parm.HypertreeHeight(),   // "h",
+			parm.D,                   // "d",
+			parm.HPrime,              // "h'",
+			parm.T,                   // "a",
+			parm.K,                   // "k",
+			parm.LgW,                 // "lg_w",
+			parm.M(),                 // "m",
+			parm.SignatureSize(),     // "sig bytes",
+			parm.SignatureHashes(),   // "sign work",
+			parm.VerifyHashes(),      // "verify work",
+			parm.SignaturesAtLevel(parm.TargetSecurityLevel),  // "sigs",
 			parm.SignaturesAtLevel(parm.OveruseSecurityLevel), // "sigs at {fallbackSecurityLevel}",
 		})
 	}
