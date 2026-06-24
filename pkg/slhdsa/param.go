@@ -58,6 +58,33 @@ func (p *ParameterSet) SecurityLevel(m float64) float64 {
 	return result
 }
 
+// Adds two values in log2 representation
+// That is, given log2(a), log2(b), this returns log2(a+b)
+// Due to the cryptographically large numbers involved in these calculations,
+// we need to avoid representing a+b in non-log form (which will round to +Inf)
+// Based on Scott Fluhrer's implementation of do_add from
+// https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
+func addLogs(a, b float64) float64 {
+	var big, little float64
+	if a > b {
+		big = a
+		little = b
+	} else {
+		big = b
+		little = a
+	}
+	// If a > b * 2^64, then log2(a+b) is essentially log2(a).
+	if big > little+64 {
+		return big
+	}
+	temp := 1 + math.Pow(0.5, big-little)
+	// big + log2(temp)
+	// = log(big) + log(1 + little/big)
+	// = log (big * (1 + little / big)
+	// = log (big + little)
+	return big + math.Log2(temp)
+}
+
 // Computes the exact security level of the parameter set for 2^m signatures
 // This is a Go translation of Scott Fluhrer's algorithm `compute_sec_level` from
 // https://github.com/sfluhrer/sphincs-param-set-search/blob/main/gamma.c
@@ -118,7 +145,7 @@ func (p *ParameterSet) ComputeSecurityLevel(m float64) float64 {
 			log_sum = log_a + log_b
 		} else {
 			// For latter iterations, add log(ab) to the running sum
-			log_sum = math.Log2(math.Exp2(log_sum) + math.Exp2(log_a+log_b))
+			log_sum = addLogs(log_sum, log_a+log_b)
 		}
 
 		// If the additional terms we're seeing is less than 2^{-20} of the
